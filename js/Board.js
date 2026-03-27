@@ -1,6 +1,6 @@
 import { Tile } from './Tile.js';
 import {
-  GRID_COLS, GRID_ROWS, STAGGER_DELAY, SCRAMBLE_DURATION,
+  GRID_COLS, GRID_ROWS, STAGGER_DELAY,
   TOTAL_TRANSITION
 } from './constants.js';
 
@@ -14,6 +14,7 @@ export class Board {
     this.tiles = [];
     this.currentGrid = [];
     this.accentIndex = 0;
+    this._transitionTimer = null;
 
     // Build board DOM
     this.boardEl = document.createElement('div');
@@ -129,14 +130,16 @@ export class Board {
   }
 
   displayMessage(lines) {
-    if (this.isTransitioning) return;
-    this.isTransitioning = true;
-
     // Format lines into grid
     const newGrid = this._formatToGrid(lines);
 
     // Determine which tiles need to change
     let hasChanges = false;
+
+    if (this._transitionTimer) {
+      clearTimeout(this._transitionTimer);
+      this._transitionTimer = null;
+    }
 
     for (let r = 0; r < this.rows; r++) {
       for (let c = 0; c < this.cols; c++) {
@@ -151,6 +154,8 @@ export class Board {
       }
     }
 
+    this.isTransitioning = hasChanges;
+
     // Play the single transition audio clip once
     if (hasChanges && this.soundEngine) {
       this.soundEngine.playTransition();
@@ -163,9 +168,12 @@ export class Board {
     this.currentGrid = newGrid;
 
     // Clear transitioning flag after animation completes
-    setTimeout(() => {
-      this.isTransitioning = false;
-    }, TOTAL_TRANSITION + 200);
+    if (hasChanges) {
+      this._transitionTimer = setTimeout(() => {
+        this.isTransitioning = false;
+        this._transitionTimer = null;
+      }, TOTAL_TRANSITION + 200);
+    }
   }
 
   _formatToGrid(lines) {

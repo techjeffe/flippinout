@@ -7,6 +7,9 @@ export class ClockMode {
   }
 
   start() {
+    if (this.updateInterval) {
+      clearInterval(this.updateInterval);
+    }
     this.isActive = true;
     this._updateClock();
     this.updateInterval = setInterval(() => this._updateClock(), 1000);

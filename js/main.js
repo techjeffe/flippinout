@@ -23,6 +23,8 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Enhanced keyboard controls
   document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
     // Theme cycling with 'T' key
     if (e.key === 't' || e.key === 'T') {
       const themeName = themeManager.cycleTheme();

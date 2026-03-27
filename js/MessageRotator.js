@@ -10,6 +10,10 @@ export class MessageRotator {
   }
 
   start() {
+    if (this._timer) {
+      clearInterval(this._timer);
+    }
+
     // Show first message immediately
     this.next();
 

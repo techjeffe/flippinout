@@ -7,6 +7,9 @@ export class Tile {
     this.currentChar = ' ';
     this.isAnimating = false;
     this._scrambleTimer = null;
+    this._startTimer = null;
+    this._timers = new Set();
+    this._runId = 0;
 
     // Build DOM
     this.el = document.createElement('div');
@@ -31,6 +34,7 @@ export class Tile {
   }
 
   setChar(char) {
+    this.cancelAnimation();
     this.currentChar = char;
     this.frontSpan.textContent = char === ' ' ? '' : char;
     this.backSpan.textContent = '';
@@ -40,34 +44,33 @@ export class Tile {
   scrambleTo(targetChar, delay) {
     if (targetChar === this.currentChar) return;
 
-    // Cancel any in-progress animation
-    if (this._scrambleTimer) {
-      clearInterval(this._scrambleTimer);
-      this._scrambleTimer = null;
-    }
+    this.cancelAnimation();
     this.isAnimating = true;
+    this._runId += 1;
+    const runId = this._runId;
 
-    setTimeout(() => {
+    this._startTimer = setTimeout(() => {
+      if (runId !== this._runId) return;
+
       this.el.classList.add('scrambling');
-      let scrambleCount = 0;
-      const maxScrambles = 12 + Math.floor(Math.random() * 6);
-      const scrambleInterval = 65;
+      const startIndex = this._getCharsetIndex(this.currentChar);
+      const targetIndex = this._getCharsetIndex(targetChar);
+      const stepCount = this._getStepCount(startIndex, targetIndex);
+      const scrambleInterval = Math.max(45, Math.floor(SCRAMBLE_DURATION / Math.max(stepCount, 1)));
+      let currentIndex = startIndex;
 
       this._scrambleTimer = setInterval(() => {
-        // Random character flipping - authentic mechanical behavior
-        // Real split-flap boards just cycle through characters, no color changes
-        let randChar;
-        if (Math.random() < 0.3 && targetChar !== ' ') {
-          // Sometimes show target character early (mechanical overshoot behavior)
-          randChar = targetChar;
-        } else {
-          randChar = CHARSET[Math.floor(Math.random() * CHARSET.length)];
+        if (runId !== this._runId) {
+          clearInterval(this._scrambleTimer);
+          this._scrambleTimer = null;
+          return;
         }
-        this.frontSpan.textContent = randChar === ' ' ? '' : randChar;
 
-        scrambleCount++;
+        currentIndex = (currentIndex + 1) % CHARSET.length;
+        const nextChar = CHARSET[currentIndex];
+        this.frontSpan.textContent = nextChar === ' ' ? '' : nextChar;
 
-        if (scrambleCount >= maxScrambles) {
+        if (currentIndex === targetIndex) {
           clearInterval(this._scrambleTimer);
           this._scrambleTimer = null;
 
@@ -79,7 +82,9 @@ export class Tile {
           this.innerEl.style.transition = `transform ${FLIP_DURATION * 1.5}ms ease-in-out`;
           this.innerEl.style.transform = 'perspective(600px) rotateX(-180deg)';
 
-          setTimeout(() => {
+          this._schedule(() => {
+            if (runId !== this._runId) return;
+
             // Swap characters
             this.frontSpan.textContent = targetChar === ' ' ? '' : targetChar;
             this.backSpan.textContent = '';
@@ -90,13 +95,19 @@ export class Tile {
             this.innerEl.classList.remove('flipping');
             
             // Brief settle bounce
-            setTimeout(() => {
+            this._schedule(() => {
+              if (runId !== this._runId) return;
+
               this.innerEl.style.transition = `transform ${FLIP_DURATION / 2}ms cubic-bezier(0.68, -0.55, 0.265, 1.55)`;
               this.innerEl.style.transform = 'perspective(600px) rotateX(-3deg)';
               
-              setTimeout(() => {
+              this._schedule(() => {
+                if (runId !== this._runId) return;
+
                 this.innerEl.style.transform = '';
-                setTimeout(() => {
+                this._schedule(() => {
+                  if (runId !== this._runId) return;
+
                   this.innerEl.style.transition = '';
                   this.el.classList.remove('scrambling');
                   this.currentChar = targetChar;
@@ -108,5 +119,49 @@ export class Tile {
         }
       }, scrambleInterval);
     }, delay);
+  }
+
+  cancelAnimation() {
+    this._runId += 1;
+
+    if (this._startTimer) {
+      clearTimeout(this._startTimer);
+      this._startTimer = null;
+    }
+
+    if (this._scrambleTimer) {
+      clearInterval(this._scrambleTimer);
+      this._scrambleTimer = null;
+    }
+
+    this._timers.forEach(timer => clearTimeout(timer));
+    this._timers.clear();
+
+    this.el.classList.remove('scrambling');
+    this.innerEl.classList.remove('flipping');
+    this.innerEl.style.transition = '';
+    this.innerEl.style.transform = '';
+    this.backSpan.textContent = '';
+    this.isAnimating = false;
+  }
+
+  _schedule(fn, delay) {
+    const timer = setTimeout(() => {
+      this._timers.delete(timer);
+      fn();
+    }, delay);
+    this._timers.add(timer);
+  }
+
+  _getCharsetIndex(char) {
+    const index = CHARSET.indexOf(char);
+    return index >= 0 ? index : 0;
+  }
+
+  _getStepCount(fromIndex, toIndex) {
+    if (toIndex >= fromIndex) {
+      return toIndex - fromIndex;
+    }
+    return (CHARSET.length - fromIndex) + toIndex;
   }
 }

@@ -32,14 +32,34 @@ export class MessageRotator {
     }
   }
 
+  setMessages(messages, { preserveCurrent = false } = {}) {
+    this.messages = messages.length ? messages : [['', '', '', '', '', '', '']];
+
+    if (!preserveCurrent) {
+      this.currentIndex = -1;
+    } else if (this.currentIndex >= this.messages.length) {
+      this.currentIndex = this.messages.length - 1;
+    }
+  }
+
   next() {
+    if (!this.messages.length) return;
     this.currentIndex = (this.currentIndex + 1) % this.messages.length;
     this.board.displayMessage(this.messages[this.currentIndex]);
     this._resetAutoRotation();
   }
 
   prev() {
+    if (!this.messages.length) return;
     this.currentIndex = (this.currentIndex - 1 + this.messages.length) % this.messages.length;
+    this.board.displayMessage(this.messages[this.currentIndex]);
+    this._resetAutoRotation();
+  }
+
+  showMessage(index) {
+    if (!this.messages.length) return;
+    const safeIndex = Math.max(0, Math.min(index, this.messages.length - 1));
+    this.currentIndex = safeIndex;
     this.board.displayMessage(this.messages[this.currentIndex]);
     this._resetAutoRotation();
   }

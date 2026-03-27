@@ -20,8 +20,7 @@
     <header class="header">
       <div class="header-logo">Flippinout</div>
       <nav class="header-nav">
-        <a href="#features">Features</a>
-        <a href="#pricing">Pricing</a>
+        <a href="#screen-settings">Screens</a>
         <button class="volume-icon" id="volume-btn" title="Toggle sound">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
@@ -34,18 +33,32 @@
 
     <!-- Hero -->
     <section class="hero">
-      <h1>The authentic split-flap display for any screen.</h1>
-      <p class="subtitle">That iconic mechanical airport board—just like the real thing. Monochrome themes, live clock, no rainbow gimmicks.</p>
+      <h1>Build your own split-flap playlist.</h1>
+      <p class="subtitle">Create one or more seven-line screens below, then let the board rotate through them like an airport display.</p>
       <div class="hero-cta">
-        <input type="email" placeholder="you@example.com">
-        <button id="cta-btn">Try It Now</button>
+        <button id="scroll-to-settings-btn">Edit Screens</button>
+        <button id="cta-btn">Go Fullscreen</button>
       </div>
-      <p style="margin-top: 16px; font-size: 13px; color: #999;">Press <kbd style="background: #e0e0e0; padding: 2px 6px; border-radius: 3px; font-family: monospace;">T</kbd> for vintage themes · <kbd style="background: #e0e0e0; padding: 2px 6px; border-radius: 3px; font-family: monospace;">C</kbd> for clock · <kbd style="background: #e0e0e0; padding: 2px 6px; border-radius: 3px; font-family: monospace;">F</kbd> for fullscreen</p>
+      <p class="hero-shortcuts">Press <kbd>T</kbd> for vintage themes · <kbd>C</kbd> for clock · <kbd>F</kbd> for fullscreen</p>
     </section>
 
-    <!-- Board -->
-    <section class="board-section" id="board-container">
+    <section class="settings-section" id="screen-settings">
+      <div class="settings-panel">
+        <div class="settings-panel-header">
+          <div>
+            <p class="settings-kicker">Screens</p>
+            <h2>What should the board show?</h2>
+            <p class="settings-copy">Each screen is seven lines tall. The display rotates through them automatically, and your screens stay saved in this browser.</p>
+          </div>
+          <button id="add-screen-btn" class="settings-add-btn" type="button">+ Add Screen</button>
+        </div>
+        <div id="screen-editor-list" class="screen-editor-list"></div>
+      </div>
     </section>
+
+  <!-- Board -->
+  <section class="board-section" id="board-container">
+  </section>
   </div>
 
   <script type="module" src="js/main.js"></script>

@@ -59,6 +59,14 @@
     font-size: 14px;
   }
 
+  .settings-panel-header {
+    flex-direction: column;
+  }
+
+  .settings-panel-header h2 {
+    font-size: 24px;
+  }
+
   .accent-segment {
     width: 12px;
     height: 12px;
@@ -86,10 +94,6 @@
     font-size: 16px;
   }
 
-  .header-nav a {
-    font-size: 12px;
-  }
-
   .hero h1 {
     font-size: 22px;
     letter-spacing: -0.5px;
@@ -106,13 +110,41 @@
     padding: 0 16px;
   }
 
-  .hero-cta input {
-    width: 100%;
-    border-radius: 8px;
-  }
-
   .hero-cta button {
     width: 100%;
+  }
+
+  .settings-section {
+    padding: 0 12px 16px;
+  }
+
+  .settings-panel {
+    padding: 14px;
+    border-radius: 14px;
+  }
+
+  .settings-panel-header h2 {
+    font-size: 22px;
+  }
+
+  .settings-copy {
+    font-size: 14px;
+  }
+
+  .screen-editor {
+    padding: 14px;
+  }
+
+  .screen-editor-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .screen-remove-btn,
+  .settings-add-btn {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
   }
 
   .accent-bar {
@@ -135,7 +167,8 @@
 }
 
 :fullscreen .header,
-:fullscreen .hero {
+:fullscreen .hero,
+:fullscreen .settings-section {
   display: none !important;
 }
 

@@ -2,13 +2,15 @@ export const GRID_COLS = 22;
 export const GRID_ROWS = 7;
 
 // Mechanical timing
-export const FLIP_DURATION = 333;
+export const DEFAULT_FLIP_DURATION = 100;
+export const MIN_FLIP_DURATION = 50;
+export const MAX_FLIP_DURATION = 333;
 export const STAGGER_DELAY = 35;
 export const SETTLE_DURATION = 286;
 export const CLEAR_PAUSE = 600;
 export const MESSAGE_INTERVAL = 60000;
 
-export const CHARSET = ' ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,-\'/&:;?!';
+export const CHARSET = ' ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,-+\'/&:;?!';
 
 // Vintage display themes (monochrome per theme - authentic to real mechanical boards)
 export const THEMES = {

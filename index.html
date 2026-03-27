@@ -54,7 +54,16 @@
             <h2>What should the board show?</h2>
             <p class="settings-copy">Each screen is seven lines tall. The display rotates through them automatically, and your screens stay saved in this browser.</p>
           </div>
-          <button id="add-screen-btn" class="settings-add-btn" type="button">+ Add Screen</button>
+          <div class="settings-actions">
+            <label class="speed-control" for="flip-speed-input">
+              <span class="speed-control-label">Flap Speed</span>
+              <div class="speed-control-row">
+                <input id="flip-speed-input" class="speed-control-input" type="range" min="50" max="333" step="1">
+                <span id="flip-speed-value" class="speed-control-value">100ms</span>
+              </div>
+            </label>
+            <button id="add-screen-btn" class="settings-add-btn" type="button">+ Add Screen</button>
+          </div>
         </div>
         <div id="screen-editor-list" class="screen-editor-list"></div>
       </div>

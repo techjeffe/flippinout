@@ -4,7 +4,13 @@ import { MessageRotator } from './MessageRotator.js';
 import { KeyboardController } from './KeyboardController.js';
 import { ThemeManager } from './ThemeManager.js';
 import { ClockMode } from './ClockMode.js';
-import { MESSAGES, QUOTE_SCREENS } from './constants.js';
+import {
+  MESSAGES,
+  QUOTE_SCREENS,
+  DEFAULT_FLIP_DURATION,
+  MIN_FLIP_DURATION,
+  MAX_FLIP_DURATION
+} from './constants.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   const STORAGE_KEY = 'flippinout-custom-screens';
@@ -15,6 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const screenEditorList = document.getElementById('screen-editor-list');
   const addScreenBtn = document.getElementById('add-screen-btn');
   const scrollToSettingsBtn = document.getElementById('scroll-to-settings-btn');
+  const flipSpeedInput = document.getElementById('flip-speed-input');
+  const flipSpeedValue = document.getElementById('flip-speed-value');
   const volumeBtn = document.getElementById('volume-btn');
   const ctaBtn = document.getElementById('cta-btn');
   const leftSettingTile = document.getElementById('left-setting-tile');
@@ -33,13 +41,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const clockMode = new ClockMode(board);
   const keyboard = new KeyboardController(rotator, soundEngine);
   const screens = loadScreens();
+  let flipDuration = loadFlipDuration();
 
+  board.setFlipDuration(flipDuration);
   rotator.setMessages(screens);
 
   let isClockMode = false;
 
   renderScreenEditors();
   syncClockTileState();
+  syncFlipSpeedControls();
 
   // Enhanced keyboard controls
   document.addEventListener('keydown', (e) => {
@@ -103,6 +114,13 @@ document.addEventListener('DOMContentLoaded', () => {
       persistScreens();
       renderScreenEditors(screens.length - 1);
       syncMessages({ previewIndex: screens.length - 1 });
+    });
+  }
+
+  if (flipSpeedInput) {
+    flipSpeedInput.addEventListener('input', () => {
+      const nextDuration = clampFlipDuration(Number.parseInt(flipSpeedInput.value, 10));
+      applyFlipDuration(nextDuration);
     });
   }
 
@@ -189,6 +207,33 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (error) {
       console.warn('Failed to load saved screens:', error);
       return normalizeScreens([MESSAGES[0]]);
+    }
+  }
+
+  function loadFlipDuration() {
+    const saved = localStorage.getItem(`${STORAGE_KEY}-flip-duration`);
+    return clampFlipDuration(Number.parseInt(saved, 10));
+  }
+
+  function clampFlipDuration(value) {
+    if (!Number.isFinite(value)) return DEFAULT_FLIP_DURATION;
+    return Math.min(MAX_FLIP_DURATION, Math.max(MIN_FLIP_DURATION, value));
+  }
+
+  function applyFlipDuration(duration) {
+    flipDuration = clampFlipDuration(duration);
+    board.setFlipDuration(flipDuration);
+    localStorage.setItem(`${STORAGE_KEY}-flip-duration`, String(flipDuration));
+    syncFlipSpeedControls();
+  }
+
+  function syncFlipSpeedControls() {
+    if (flipSpeedInput) {
+      flipSpeedInput.value = String(flipDuration);
+    }
+
+    if (flipSpeedValue) {
+      flipSpeedValue.textContent = `${flipDuration}ms`;
     }
   }
 

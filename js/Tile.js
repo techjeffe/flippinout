@@ -1,4 +1,4 @@
-import { CHARSET, FLIP_DURATION, SETTLE_DURATION, CLEAR_PAUSE } from './constants.js';
+import { CHARSET, DEFAULT_FLIP_DURATION, SETTLE_DURATION, CLEAR_PAUSE } from './constants.js';
 
 export class Tile {
   constructor(row, col) {
@@ -10,6 +10,7 @@ export class Tile {
     this._startTimer = null;
     this._timers = new Set();
     this._runId = 0;
+    this.flipDuration = DEFAULT_FLIP_DURATION;
 
     // Build DOM
     this.el = document.createElement('div');
@@ -43,6 +44,10 @@ export class Tile {
 
   scrambleTo(targetChar, delay) {
     this.flipSequenceTo(targetChar, delay);
+  }
+
+  setFlipDuration(duration) {
+    this.flipDuration = duration;
   }
 
   flipSequenceTo(targetChar, delay, { resetFirst = false } = {}) {
@@ -149,7 +154,7 @@ export class Tile {
     const nextChar = sequence[index];
     this.backSpan.textContent = nextChar === ' ' ? '' : nextChar;
     this.innerEl.classList.add('flipping');
-    this.innerEl.style.transition = `transform ${FLIP_DURATION}ms ease-in-out`;
+    this.innerEl.style.transition = `transform ${this.flipDuration}ms ease-in-out`;
     this.innerEl.style.transform = 'perspective(600px) rotateX(-180deg)';
 
     this._schedule(() => {
@@ -194,10 +199,10 @@ export class Tile {
           }, Math.max(40, Math.floor(SETTLE_DURATION * 0.2)));
         }, Math.max(60, Math.floor(SETTLE_DURATION * 0.4)));
       }, 10);
-    }, FLIP_DURATION);
+    }, this.flipDuration);
   }
 
   _getSequenceDuration(stepCount, pauseAfterIndex) {
-    return stepCount * (FLIP_DURATION + SETTLE_DURATION) + (pauseAfterIndex >= 0 ? CLEAR_PAUSE : 0);
+    return stepCount * (this.flipDuration + SETTLE_DURATION) + (pauseAfterIndex >= 0 ? CLEAR_PAUSE : 0);
   }
 }

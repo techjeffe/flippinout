@@ -106,6 +106,14 @@ export class Board {
     this._updateAccentColors();
   }
 
+  setFlipDuration(duration) {
+    for (const row of this.tiles) {
+      for (const tile of row) {
+        tile.setFlipDuration(duration);
+      }
+    }
+  }
+
   _createAccentBar(extraClass) {
     const bar = document.createElement('div');
     bar.className = `accent-bar ${extraClass}`;

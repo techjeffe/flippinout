@@ -8,7 +8,7 @@ export const SETTLE_DURATION = 286;
 export const CLEAR_PAUSE = 600;
 export const MESSAGE_INTERVAL = 60000;
 
-export const CHARSET = ' ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890-=,./?!\':;';
+export const CHARSET = ' ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,-\'/&:;?!';
 
 // Vintage display themes (monochrome per theme - authentic to real mechanical boards)
 export const THEMES = {

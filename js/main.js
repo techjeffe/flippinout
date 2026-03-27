@@ -4,7 +4,7 @@ import { MessageRotator } from './MessageRotator.js';
 import { KeyboardController } from './KeyboardController.js';
 import { ThemeManager } from './ThemeManager.js';
 import { ClockMode } from './ClockMode.js';
-import { MESSAGES } from './constants.js';
+import { MESSAGES, QUOTE_SCREENS } from './constants.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   const STORAGE_KEY = 'flippinout-custom-screens';
@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (addScreenBtn) {
     addScreenBtn.addEventListener('click', () => {
-      screens.push(createEmptyScreen());
+      screens.push(createQuoteScreen());
       persistScreens();
       renderScreenEditors(screens.length - 1);
       syncMessages({ previewIndex: screens.length - 1 });
@@ -161,6 +161,11 @@ document.addEventListener('DOMContentLoaded', () => {
     return Array(MAX_LINES).fill('');
   }
 
+  function createQuoteScreen() {
+    const quote = QUOTE_SCREENS[Math.floor(Math.random() * QUOTE_SCREENS.length)] || createEmptyScreen();
+    return quote.map(line => line.slice(0, board.cols));
+  }
+
   function normalizeScreens(rawScreens) {
     if (!Array.isArray(rawScreens) || !rawScreens.length) {
       return [createEmptyScreen()];
@@ -192,7 +197,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function screenToTextareaValue(screen) {
-    return screen.join('\n');
+    let lastNonEmptyIndex = screen.findLastIndex(line => line.trim().length > 0);
+
+    if (lastNonEmptyIndex === -1) {
+      lastNonEmptyIndex = 0;
+    }
+
+    return screen.slice(0, lastNonEmptyIndex + 1).join('\n');
   }
 
   function textareaToScreen(value) {
@@ -353,7 +364,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const help = document.createElement('p');
       help.className = 'screen-editor-help';
-      help.textContent = 'Use line breaks to create rows. Extra lines are ignored.';
+      help.textContent = 'Press Enter to add the next row. Up to 7 rows are supported.';
 
       card.appendChild(header);
       card.appendChild(textarea);

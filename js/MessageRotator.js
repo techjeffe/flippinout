@@ -1,4 +1,4 @@
-import { MESSAGES, MESSAGE_INTERVAL, TOTAL_TRANSITION } from './constants.js';
+import { MESSAGES, MESSAGE_INTERVAL } from './constants.js';
 
 export class MessageRotator {
   constructor(board) {
@@ -10,26 +10,14 @@ export class MessageRotator {
   }
 
   start() {
-    if (this._timer) {
-      clearInterval(this._timer);
-    }
+    this._clearTimer();
 
     // Show first message immediately
     this.next();
-
-    // Begin auto-rotation
-    this._timer = setInterval(() => {
-      if (!this._paused && !this.board.isTransitioning) {
-        this.next();
-      }
-    }, MESSAGE_INTERVAL + TOTAL_TRANSITION);
   }
 
   stop() {
-    if (this._timer) {
-      clearInterval(this._timer);
-      this._timer = null;
-    }
+    this._clearTimer();
   }
 
   setMessages(messages, { preserveCurrent = false } = {}) {
@@ -65,14 +53,22 @@ export class MessageRotator {
   }
 
   _resetAutoRotation() {
-    // Reset timer when user manually navigates
+    this._clearTimer();
+    this._timer = setTimeout(() => {
+      this._timer = null;
+      if (!this._paused && !this.board.isTransitioning) {
+        this.next();
+        return;
+      }
+
+      this._resetAutoRotation();
+    }, Math.max(MESSAGE_INTERVAL, this.board.getTransitionDuration() + 1000));
+  }
+
+  _clearTimer() {
     if (this._timer) {
-      clearInterval(this._timer);
-      this._timer = setInterval(() => {
-        if (!this._paused && !this.board.isTransitioning) {
-          this.next();
-        }
-      }, MESSAGE_INTERVAL + TOTAL_TRANSITION);
+      clearTimeout(this._timer);
+      this._timer = null;
     }
   }
 }

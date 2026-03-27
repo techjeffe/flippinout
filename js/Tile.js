@@ -1,4 +1,4 @@
-import { CHARSET, SCRAMBLE_DURATION, FLIP_DURATION } from './constants.js';
+import { CHARSET, FLIP_DURATION, SETTLE_DURATION, CLEAR_PAUSE } from './constants.js';
 
 export class Tile {
   constructor(row, col) {
@@ -42,83 +42,31 @@ export class Tile {
   }
 
   scrambleTo(targetChar, delay) {
-    if (targetChar === this.currentChar) return;
+    this.flipSequenceTo(targetChar, delay);
+  }
+
+  flipSequenceTo(targetChar, delay, { resetFirst = false } = {}) {
+    if (!resetFirst && targetChar === this.currentChar) return 0;
 
     this.cancelAnimation();
     this.isAnimating = true;
     this._runId += 1;
     const runId = this._runId;
+    const { sequence, pauseAfterIndex } = this._buildSequence(this.currentChar, targetChar, resetFirst);
+
+    if (!sequence.length) {
+      this.isAnimating = false;
+      return 0;
+    }
 
     this._startTimer = setTimeout(() => {
       if (runId !== this._runId) return;
 
       this.el.classList.add('scrambling');
-      const startIndex = this._getCharsetIndex(this.currentChar);
-      const targetIndex = this._getCharsetIndex(targetChar);
-      const stepCount = this._getStepCount(startIndex, targetIndex);
-      const scrambleInterval = Math.max(45, Math.floor(SCRAMBLE_DURATION / Math.max(stepCount, 1)));
-      let currentIndex = startIndex;
-
-      this._scrambleTimer = setInterval(() => {
-        if (runId !== this._runId) {
-          clearInterval(this._scrambleTimer);
-          this._scrambleTimer = null;
-          return;
-        }
-
-        currentIndex = (currentIndex + 1) % CHARSET.length;
-        const nextChar = CHARSET[currentIndex];
-        this.frontSpan.textContent = nextChar === ' ' ? '' : nextChar;
-
-        if (currentIndex === targetIndex) {
-          clearInterval(this._scrambleTimer);
-          this._scrambleTimer = null;
-
-          // Prepare back face with new character
-          this.backSpan.textContent = targetChar === ' ' ? '' : targetChar;
-
-          // Full 3D mechanical flip animation
-          this.innerEl.classList.add('flipping');
-          this.innerEl.style.transition = `transform ${FLIP_DURATION * 1.5}ms ease-in-out`;
-          this.innerEl.style.transform = 'perspective(600px) rotateX(-180deg)';
-
-          this._schedule(() => {
-            if (runId !== this._runId) return;
-
-            // Swap characters
-            this.frontSpan.textContent = targetChar === ' ' ? '' : targetChar;
-            this.backSpan.textContent = '';
-            
-            // Reset rotation
-            this.innerEl.style.transition = 'none';
-            this.innerEl.style.transform = '';
-            this.innerEl.classList.remove('flipping');
-            
-            // Brief settle bounce
-            this._schedule(() => {
-              if (runId !== this._runId) return;
-
-              this.innerEl.style.transition = `transform ${FLIP_DURATION / 2}ms cubic-bezier(0.68, -0.55, 0.265, 1.55)`;
-              this.innerEl.style.transform = 'perspective(600px) rotateX(-3deg)';
-              
-              this._schedule(() => {
-                if (runId !== this._runId) return;
-
-                this.innerEl.style.transform = '';
-                this._schedule(() => {
-                  if (runId !== this._runId) return;
-
-                  this.innerEl.style.transition = '';
-                  this.el.classList.remove('scrambling');
-                  this.currentChar = targetChar;
-                  this.isAnimating = false;
-                }, 50);
-              }, 60);
-            }, 10);
-          }, FLIP_DURATION * 1.5);
-        }
-      }, scrambleInterval);
+      this._playSequence(sequence, 0, runId, pauseAfterIndex);
     }, delay);
+
+    return delay + this._getSequenceDuration(sequence.length, pauseAfterIndex);
   }
 
   cancelAnimation() {
@@ -163,5 +111,93 @@ export class Tile {
       return toIndex - fromIndex;
     }
     return (CHARSET.length - fromIndex) + toIndex;
+  }
+
+  _buildSequence(fromChar, targetChar, resetFirst) {
+    const sequence = [];
+    let pauseAfterIndex = -1;
+    const pushForwardRange = (startChar, endChar) => {
+      const startIndex = this._getCharsetIndex(startChar);
+      const endIndex = this._getCharsetIndex(endChar);
+      const steps = this._getStepCount(startIndex, endIndex);
+
+      for (let step = 1; step <= steps; step += 1) {
+        sequence.push(CHARSET[(startIndex + step) % CHARSET.length]);
+      }
+    };
+
+    if (resetFirst && fromChar !== ' ') {
+      pushForwardRange(fromChar, ' ');
+      pauseAfterIndex = sequence.length - 1;
+      fromChar = ' ';
+    }
+
+    if (targetChar !== fromChar) {
+      pushForwardRange(fromChar, targetChar);
+    }
+
+    if (pauseAfterIndex === sequence.length - 1) {
+      pauseAfterIndex = -1;
+    }
+
+    return { sequence, pauseAfterIndex };
+  }
+
+  _playSequence(sequence, index, runId, pauseAfterIndex) {
+    if (runId !== this._runId) return;
+
+    const nextChar = sequence[index];
+    this.backSpan.textContent = nextChar === ' ' ? '' : nextChar;
+    this.innerEl.classList.add('flipping');
+    this.innerEl.style.transition = `transform ${FLIP_DURATION}ms ease-in-out`;
+    this.innerEl.style.transform = 'perspective(600px) rotateX(-180deg)';
+
+    this._schedule(() => {
+      if (runId !== this._runId) return;
+
+      this.frontSpan.textContent = nextChar === ' ' ? '' : nextChar;
+      this.backSpan.textContent = '';
+      this.innerEl.style.transition = 'none';
+      this.innerEl.style.transform = '';
+      this.innerEl.classList.remove('flipping');
+
+      this._schedule(() => {
+        if (runId !== this._runId) return;
+
+        this.innerEl.style.transition = `${Math.max(100, Math.floor(SETTLE_DURATION * 0.6))}ms cubic-bezier(0.68, -0.55, 0.265, 1.55)`;
+        this.innerEl.style.transform = 'perspective(600px) rotateX(-2deg)';
+
+        this._schedule(() => {
+          if (runId !== this._runId) return;
+
+          this.innerEl.style.transform = '';
+          this._schedule(() => {
+            if (runId !== this._runId) return;
+
+            this.innerEl.style.transition = '';
+            this.currentChar = nextChar;
+
+            if (index === sequence.length - 1) {
+              this.el.classList.remove('scrambling');
+              this.isAnimating = false;
+              return;
+            }
+
+            const nextDelay = index === pauseAfterIndex
+              ? CLEAR_PAUSE
+              : Math.max(40, Math.floor(SETTLE_DURATION * 0.2));
+
+            this._schedule(() => {
+              if (runId !== this._runId) return;
+              this._playSequence(sequence, index + 1, runId, pauseAfterIndex);
+            }, nextDelay);
+          }, Math.max(40, Math.floor(SETTLE_DURATION * 0.2)));
+        }, Math.max(60, Math.floor(SETTLE_DURATION * 0.4)));
+      }, 10);
+    }, FLIP_DURATION);
+  }
+
+  _getSequenceDuration(stepCount, pauseAfterIndex) {
+    return stepCount * (FLIP_DURATION + SETTLE_DURATION) + (pauseAfterIndex >= 0 ? CLEAR_PAUSE : 0);
   }
 }

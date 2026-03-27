@@ -1,12 +1,12 @@
 export const GRID_COLS = 22;
 export const GRID_ROWS = 7;
 
-// More authentic mechanical timing
-export const SCRAMBLE_DURATION = 1200;
-export const FLIP_DURATION = 180;
+// Mechanical timing
+export const FLIP_DURATION = 333;
 export const STAGGER_DELAY = 35;
-export const TOTAL_TRANSITION = 5000;
-export const MESSAGE_INTERVAL = 6000;
+export const SETTLE_DURATION = 286;
+export const CLEAR_PAUSE = 600;
+export const MESSAGE_INTERVAL = 60000;
 
 export const CHARSET = ' ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890-=,./?!\':;';
 
@@ -148,4 +148,27 @@ export const MESSAGES = [
     '',
     ''
   ]
+];
+
+export const QUOTE_SCREENS = [
+  ['', 'STAY HUNGRY', 'STAY FOOLISH', '', '- STEVE JOBS', '', ''],
+  ['', 'LESS IS MORE', '', '', '- MIES VAN DER ROHE', '', ''],
+  ['', 'MAKE IT SIMPLE', 'BUT SIGNIFICANT', '', '- DON DRAPER', '', ''],
+  ['', 'DONE IS BETTER', 'THAN PERFECT', '', '- SHERYL SANDBERG', '', ''],
+  ['', 'TASTE IS THE', 'ENEMY OF ART', '', '- PABLO PICASSO', '', ''],
+  ['', 'FORTUNE FAVORS', 'THE BOLD', '', '- VIRGIL', '', ''],
+  ['', 'MOVE FAST', 'AND FIX THINGS', '', '- PARAPHRASED', '', ''],
+  ['', 'GOOD THINGS', 'TAKE TIME', '', '- OLD WISDOM', '', ''],
+  ['', 'WHAT A TIME', 'TO BE ALIVE', '', '- MODERN SAYING', '', ''],
+  ['', 'EYES ON THE', 'HORIZON', '', '- KEEP GOING', '', ''],
+  ['', 'SHIP THE THING', '', '', '- FRIENDLY ADVICE', '', ''],
+  ['', 'GO MAKE THE', 'WEIRD VERSION', '', '- CREATIVE RULE', '', ''],
+  ['', 'SMALL STEPS', 'STILL COUNT', '', '- DAILY PRACTICE', '', ''],
+  ['', 'KEEP THE RECEIPTS', '', '', '- EXPERIENCED ADULT', '', ''],
+  ['', 'CHAOS IS A', 'LADDER', '', '- LITTLEFINGER', '', ''],
+  ['', 'MAKE IT WORK', 'THEN MAKE IT', 'BETTER', '- COMMON SENSE', '', ''],
+  ['', 'NEAT IS NICE', 'CLEAR IS BETTER', '', '- DESIGN NOTE', '', ''],
+  ['', 'YOU CAN DO', 'HARD THINGS', '', '- TRUE FACT', '', ''],
+  ['', 'TRUST THE PROCESS', '', '', '- POSTER ENERGY', '', ''],
+  ['', 'THIS COULD BE', 'AN EMAIL', '', '- OFFICE HUMOR', '', '']
 ];

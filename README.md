@@ -2,15 +2,17 @@
 
 An animated split-flap display for the browser, tuned for fullscreen use on TVs, dashboards, kiosks, and GitHub Pages.
 
-This repo is based on [mathmati/flippinout](https://github.com/mathmati/flippinout), which itself built on [magnum6actual/flipoff](https://github.com/magnum6actual/flipoff). This version keeps that lineage visible while adding a cleaner presentation, better interaction behavior, and a more practical message-editing workflow.
+This repo is based on [mathmati/flippinout](https://github.com/mathmati/flippinout), which itself built on [magnum6actual/flipoff](https://github.com/magnum6actual/flipoff). This version keeps that lineage visible while adding a cleaner presentation, slower mechanical transitions, and a more practical message-editing workflow.
 
 ## Highlights
 
 - Four monochrome display themes
-- Fullscreen-friendly layout
+- Clean board-first homepage layout
+- Fullscreen-friendly presentation
 - Editable multi-screen message playlist
-- Seven-line screen editor built into the page
+- Seven-line screen editor below the board
 - Local browser persistence for custom screens
+- Random quote-prefill when adding a new screen
 - Live clock mode with date
 - Keyboard shortcuts and mobile controls
 - Embedded transition audio with mute toggle
@@ -35,22 +37,41 @@ Because the app is fully static, you can:
 1. Open [`index.html`](/Users/jeffeberhard/Documents/github/flippinout/index.html) directly in a browser.
 2. Or publish the repo with GitHub Pages and use it as a hosted display page.
 
-The page now includes a built-in `Screens` editor:
+The homepage now keeps the board front and center, with the `Screens` editor below it. The `Edit Screens` button and the header link scroll down to the editor when needed.
+
+## Screens Editor
+
+The built-in `Screens` editor works like this:
 
 - Each screen is exactly 7 lines tall
 - You start with one screen by default
 - Use `+ Add Screen` to create more
+- New screens are prefilled with a random quote from a curated set of 20 fitting options
 - The board rotates through your screens automatically
 - Screens are saved in `localStorage` in the current browser
 
 ## Editor Rules
 
-The editor now enforces the board constraints directly:
+The editor enforces the board constraints directly:
 
 - A line cannot exceed the display width
+- Typing past the line limit is blocked
 - Extra pasted characters are trimmed to fit
 - Extra lines beyond the 7 visible rows are ignored
+- Press `Enter` to create the next row, up to 7 rows
 - Screen content is normalized before it is shown on the board
+
+## Transition Style
+
+Screen changes are intentionally slow and theatrical:
+
+- The board clears first
+- It pauses briefly while blank
+- Then each tile continues forward through the flap wheel into the next screen
+- Each flap takes about one third of a second
+- Automatic screen rotation waits at least one minute between changes
+
+That means a full board change can take a long time on purpose, which is now part of the display style.
 
 ## Character Wheel
 
@@ -67,10 +88,12 @@ Recent updates in this fork include:
 - Fixed clock mode so it can keep updating instead of getting blocked by long transitions
 - Fixed next/previous navigation so inputs are not dropped during an active flip
 - Replaced the fake email CTA and placeholder marketing links with a real screen settings editor
+- Moved the editor below the board so the homepage stays visually clean
 - Added support for multiple saved custom screens with a `+ Add Screen` workflow
+- Prefilled new screens with random quotes that already fit the board
 - Enforced per-line width directly in the editor so users cannot overflow the board
-- Changed tile animation from random scramble behavior to an ordered split-flap wheel
-- Expanded the character wheel to cover letters, digits, and common punctuation in sequence
+- Changed screen transitions to clear the board first, then flap all the way through the sequence
+- Slowed each flap to a more mechanical pace and increased the minimum interval between screen changes
 
 ## GitHub Pages Notes
 

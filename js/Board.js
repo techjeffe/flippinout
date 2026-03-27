@@ -1,7 +1,6 @@
 import { Tile } from './Tile.js';
 import {
-  GRID_COLS, GRID_ROWS, STAGGER_DELAY,
-  TOTAL_TRANSITION
+  GRID_COLS, GRID_ROWS, STAGGER_DELAY
 } from './constants.js';
 
 export class Board {
@@ -15,6 +14,7 @@ export class Board {
     this.currentGrid = [];
     this.accentIndex = 0;
     this._transitionTimer = null;
+    this._lastTransitionDuration = 0;
 
     // Build board DOM
     this.boardEl = document.createElement('div');
@@ -135,6 +135,7 @@ export class Board {
 
     // Determine which tiles need to change
     let hasChanges = false;
+    let transitionDuration = 0;
 
     if (this._transitionTimer) {
       clearTimeout(this._transitionTimer);
@@ -148,13 +149,15 @@ export class Board {
 
         if (newChar !== oldChar) {
           const delay = (r * this.cols + c) * STAGGER_DELAY;
-          this.tiles[r][c].scrambleTo(newChar, delay);
+          const tileDuration = this.tiles[r][c].flipSequenceTo(newChar, delay, { resetFirst: true });
+          transitionDuration = Math.max(transitionDuration, tileDuration);
           hasChanges = true;
         }
       }
     }
 
     this.isTransitioning = hasChanges;
+    this._lastTransitionDuration = hasChanges ? transitionDuration : 0;
 
     // Play the single transition audio clip once
     if (hasChanges && this.soundEngine) {
@@ -172,8 +175,12 @@ export class Board {
       this._transitionTimer = setTimeout(() => {
         this.isTransitioning = false;
         this._transitionTimer = null;
-      }, TOTAL_TRANSITION + 200);
+      }, transitionDuration + 200);
     }
+  }
+
+  getTransitionDuration() {
+    return this._lastTransitionDuration;
   }
 
   _formatToGrid(lines) {
